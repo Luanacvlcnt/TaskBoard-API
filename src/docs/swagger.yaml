@@ -9,6 +9,7 @@ servers:
 tags:
   - name: Health
   - name: Auth
+  - name: Tasks
 components:
   securitySchemes:
     bearerAuth:
@@ -64,6 +65,41 @@ components:
         updatedAt:
           type: string
           format: date-time
+    CreateTaskRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          example: Implementar fluxo de login
+        description:
+          type: string
+          example: Detalhes da implementacao JWT.
+    TaskResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          example: pendente
+        userId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    CreateTaskEnvelope:
+      type: object
+      properties:
+        task:
+          $ref: "#/components/schemas/TaskResponse"
 paths:
   /api/health:
     get:
@@ -121,3 +157,26 @@ paths:
           description: User profile
         "401":
           description: Unauthorized
+  /api/tasks:
+    post:
+      tags: [Tasks]
+      summary: Create personal task for authenticated user
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateTaskRequest"
+      responses:
+        "201":
+          description: Task created with status pendente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateTaskEnvelope"
+        "400":
+          description: Missing or invalid fields
+        "401":
+          description: Missing or invalid JWT

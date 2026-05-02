@@ -21,17 +21,21 @@ src/
     swagger.js
   controllers/
     auth.controller.js
+    task.controller.js
   docs/
     swagger.yaml
   middlewares/
     auth.middleware.js
   models/
     User.js
+    Task.js
   routes/
     auth.routes.js
+    tasks.routes.js
     index.js
   services/
     auth.service.js
+    task.service.js
 ```
 
 ## Variaveis de ambiente
@@ -55,6 +59,7 @@ Variaveis utilizadas:
 
 - `npm run dev`: inicia com `nodemon` (reinicia automaticamente ao alterar arquivos)
 - `npm start`: inicia de forma estatica
+- `npm test`: executa os testes unitarios com Jest
 
 ## Como executar
 
@@ -78,6 +83,7 @@ Variaveis utilizadas:
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `GET /api/auth/me` (JWT Bearer)
+- `POST /api/tasks` (JWT Bearer) — criar tarefa pessoal
 
 ## Swagger
 

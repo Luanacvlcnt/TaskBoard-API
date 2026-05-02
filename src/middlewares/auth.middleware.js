@@ -3,12 +3,16 @@ const jwt = require("jsonwebtoken");
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
-    return res.status(401).json({ message: "Authorization header missing." });
+    return res.status(401).json({
+      message: "Token não fornecido ou inválido",
+    });
   }
 
   const [scheme, token] = authHeader.split(" ");
   if (scheme !== "Bearer" || !token) {
-    return res.status(401).json({ message: "Invalid authorization format." });
+    return res.status(401).json({
+      message: "Token não fornecido ou inválido",
+    });
   }
 
   try {
@@ -21,7 +25,9 @@ function authMiddleware(req, res, next) {
     req.userId = payload.sub;
     return next();
   } catch (error) {
-    return res.status(401).json({ message: "Invalid or expired token." });
+    return res.status(401).json({
+      message: "Token não fornecido ou inválido",
+    });
   }
 }
 

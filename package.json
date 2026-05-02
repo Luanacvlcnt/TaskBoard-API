@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   },
   "homepage": "https://github.com/Luanacvlcnt/TaskBoard-API#readme",
   "devDependencies": {
+    "jest": "^30.3.0",
     "nodemon": "^3.1.14"
   },
   "dependencies": {
