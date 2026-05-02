@@ -55,6 +55,7 @@ Variaveis utilizadas:
 
 - `npm run dev`: inicia com `nodemon` (reinicia automaticamente ao alterar arquivos)
 - `npm start`: inicia de forma estatica
+- `npm test`: executa os testes unitarios com Jest
 
 ## Como executar
 
