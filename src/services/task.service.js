@@ -40,4 +40,9 @@ async function createTask(userId, { title, description } = {}) {
   return sanitizeTask(task);
 }
 
-module.exports = { createTask };
+async function listTasksForUser(userId) {
+  const tasks = await Task.find({ user: userId }).sort({ createdAt: -1 });
+  return tasks.map((task) => sanitizeTask(task));
+}
+
+module.exports = { createTask, listTasksForUser };

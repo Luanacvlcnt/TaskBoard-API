@@ -84,6 +84,7 @@ Variaveis utilizadas:
 - `POST /api/auth/login`
 - `GET /api/auth/me` (JWT Bearer)
 - `POST /api/tasks` (JWT Bearer) — criar tarefa pessoal
+- `GET /api/tasks` (JWT Bearer) — listar tarefas do usuario autenticado
 
 ## Swagger
 

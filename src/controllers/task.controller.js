@@ -1,4 +1,4 @@
-const { createTask } = require("../services/task.service");
+const { createTask, listTasksForUser } = require("../services/task.service");
 
 async function create(req, res) {
   try {
@@ -9,4 +9,9 @@ async function create(req, res) {
   }
 }
 
-module.exports = { create };
+async function list(req, res) {
+  const tasks = await listTasksForUser(req.userId);
+  return res.status(200).json({ tasks });
+}
+
+module.exports = { create, list };
