@@ -7,31 +7,19 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "test": "jest"
-  "keywords": [],
-  "homepage": "https://github.com/Luanacvlcnt/TaskBoard-API#readme",
-  "bugs": {
-    "url": "https://github.com/Luanacvlcnt/TaskBoard-API/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Luanacvlcnt/TaskBoard-API.git"
   },
-  "license": "ISC",
+  "keywords": [],
   "author": "",
+  "license": "ISC",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/Luanacvlcnt/TaskBoard-API/issues"
   },
   "homepage": "https://github.com/Luanacvlcnt/TaskBoard-API#readme",
-  "devDependencies": {
-    "jest": "^30.3.0",
-    "nodemon": "^3.1.14"
-  "main": "src/server.js",
-  "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js",
-    "test": "jest"
-  },
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",

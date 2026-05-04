@@ -1,6 +1,7 @@
 require("dotenv").config();
 const app = require("./app");
 const { connectDatabase } = require("./config/database");
+const Task = require("./models/Task");
 
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
@@ -8,6 +9,8 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 async function bootstrap() {
   try {
     await connectDatabase();
+    await Task.syncIndexes();
+
     app.listen(PORT, () => {
       // eslint-disable-next-line no-console
       console.log(`Server running at ${BASE_URL}`);

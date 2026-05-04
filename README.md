@@ -1,25 +1,26 @@
 # TaskBoard API
 
-API REST em **Node.js** para o ecossistema TaskBoard: autenticação de usuários com **JWT**, persistência em **MongoDB** (via **Mongoose**) e documentação interativa com **Swagger UI**. O servidor expõe rotas sob o prefixo **`/api`** e carrega a especificação OpenAPI a partir de `src/docs/swagger.yaml`.
+API REST em **Node.js** para o ecossistema TaskBoard: autenticação de usuários com **JWT**, tarefas pessoais associadas ao usuário, persistência em **MongoDB** (via **Mongoose**) e documentação interativa com **Swagger UI**. O servidor expõe rotas sob o prefixo **`/api`** e carrega a especificação OpenAPI a partir de `src/docs/swagger.yaml`.
 
 ## O que a API oferece
 
 - **Saúde do serviço** — `GET /api/health` para verificar se a API está no ar.
 - **Cadastro e login** — registro com validações de nome, e-mail e senha; login com retorno de token JWT.
 - **Perfil autenticado** — `GET /api/auth/me` com token Bearer para obter os dados do usuário logado.
+- **Tarefas** — criar (`POST /api/tasks`) e listar (`GET /api/tasks`) apenas as tarefas do usuário autenticado.
 - **Documentação** — interface Swagger em `/api-docs` com os contratos das rotas e exemplos de payload.
 
 ## Tecnologias
 
-| Camada        | Tecnologia                          |
-|---------------|-------------------------------------|
-| Runtime       | Node.js                             |
-| Framework HTTP| Express                           |
-| Banco de dados| MongoDB + Mongoose                  |
-| Autenticação  | JWT (`jsonwebtoken`)                |
-| Hash de senha | `bcryptjs`                          |
-| Documentação  | `swagger-ui-express` + `yamljs`     |
-| Testes        | Jest                                |
+| Camada         | Tecnologia                          |
+|----------------|-------------------------------------|
+| Runtime        | Node.js                             |
+| Framework HTTP | Express                             |
+| Banco de dados | MongoDB + Mongoose                  |
+| Autenticação   | JWT (`jsonwebtoken`)                |
+| Hash de senha  | `bcryptjs`                          |
+| Documentação   | `swagger-ui-express` + `yamljs`     |
+| Testes         | Jest                                |
 
 ## Arquitetura
 
@@ -28,24 +29,30 @@ O código segue separação em **rotas → controladores → serviços → model
 ```text
 src/
   app.js                 # Express, CORS, JSON, montagem de /api e /api-docs
-  server.js              # Conexão ao MongoDB e subida do HTTP
+  server.js              # Conexão ao MongoDB, índices e subida do HTTP
   config/
     database.js          # mongoose.connect
     swagger.js           # Carrega swagger.yaml
   controllers/
     auth.controller.js   # HTTP: register, login, me
+    task.controller.js   # HTTP: criar e listar tarefas
   docs/
     swagger.yaml         # Especificação OpenAPI
   middlewares/
     auth.middleware.js   # Validação JWT (Bearer)
+    auth.middleware.unit.test.js
   models/
     User.js              # Schema de usuário
+    Task.js              # Schema de tarefa
   routes/
     auth.routes.js       # Rotas /auth/*
-    index.js             # Agrega /health e /auth
+    tasks.routes.js      # Rotas /tasks/*
+    index.js             # Agrega /health, /auth e /tasks
   services/
-    auth.service.js      # Regras de negócio de autenticação
-    auth.service.unit.test.js   # Testes unitários (Jest)
+    auth.service.js      # Autenticação e registro
+    auth.service.unit.test.js
+    task.service.js      # Regras de tarefas
+    task.service.unit.test.js
 ```
 
 ## Pré-requisitos
@@ -82,13 +89,13 @@ src/
 ## Variáveis de ambiente
 
 | Variável         | Obrigatória | Descrição |
-|------------------|------------|-----------|
-| `NODE_ENV`       | Não        | Ex.: `development` ou `production`. |
-| `PORT`           | Não        | Porta HTTP (padrão comum: `3000`). |
-| `BASE_URL`       | Não        | URL base usada em logs (ex.: `http://localhost:3000`). |
-| `MONGODB_URI`    | Sim        | URI de conexão do MongoDB. |
-| `JWT_SECRET`     | Sim        | Segredo para assinar e validar JWTs. |
-| `JWT_EXPIRES_IN` | Não        | Tempo de expiração do token (ex.: `1d`, `8h`). Padrão típico no código: `1d`. |
+|------------------|-------------|-----------|
+| `NODE_ENV`       | Não         | Ex.: `development` ou `production`. |
+| `PORT`           | Não         | Porta HTTP (padrão comum: `3000`). |
+| `BASE_URL`       | Não         | URL base usada em logs (ex.: `http://localhost:3000`). |
+| `MONGODB_URI`    | Sim         | URI de conexão do MongoDB. |
+| `JWT_SECRET`     | Sim         | Segredo para assinar e validar JWTs. |
+| `JWT_EXPIRES_IN` | Não         | Tempo de expiração do token (ex.: `1d`, `8h`). Padrão típico no código: `1d`. |
 
 ## Como executar a API
 
@@ -107,26 +114,29 @@ npm start
 Com a aplicação no ar, a API fica disponível em `http://localhost:<PORT>` (por exemplo `http://localhost:3000`). A documentação interativa:
 
 - **Swagger UI:** `http://localhost:3000/api-docs`
-- `npm run dev`: inicia com `nodemon` (reinicia automaticamente ao alterar arquivos)
-- `npm start`: inicia de forma estatica
-- `npm test`: executa os testes unitarios com Jest
 
 ## Endpoints (resumo)
 
 Todas as rotas de negócio ficam sob **`/api`**.
 
 | Método | Rota | Autenticação | Descrição |
-|--------|------|----------------|-----------|
+|--------|------|--------------|-----------|
 | `GET`  | `/api/health` | Não | Verificação de saúde. |
 | `POST` | `/api/auth/register` | Não | Cadastro de usuário. |
 | `POST` | `/api/auth/login` | Não | Login; retorna JWT. |
 | `GET`  | `/api/auth/me` | Bearer JWT | Dados do usuário autenticado. |
+| `POST` | `/api/tasks` | Bearer JWT | Criar tarefa pessoal. |
+| `GET`  | `/api/tasks` | Bearer JWT | Listar tarefas do usuário. |
 
 Detalhes de corpos de requisição, códigos HTTP e schemas estão no **Swagger** (`/api-docs`) e no arquivo `src/docs/swagger.yaml`.
 
 ## Testes
 
-Os testes são **unitários** (Jest), focados na camada de **serviço** — por exemplo `auth.service.unit.test.js` — com mocks de `User`, `bcrypt` e `jsonwebtoken`, sem subir servidor HTTP nem banco real.
+Os testes são **unitários** (Jest), focados nas camadas de **serviço** e **middleware**, com mocks — sem subir servidor HTTP nem banco real. Arquivos típicos:
+
+- `src/services/auth.service.unit.test.js`
+- `src/services/task.service.unit.test.js`
+- `src/middlewares/auth.middleware.unit.test.js`
 
 ### Executar todos os testes uma vez
 
@@ -156,11 +166,11 @@ Requisito: ter rodado `npm install` para instalar o Jest em `devDependencies`.
 
 ## Scripts npm
 
-| Script        | Comando           | Descrição |
-|---------------|-------------------|-----------|
-| Desenvolvimento | `npm run dev`   | `nodemon` em `src/server.js`. |
-| Início        | `npm start`       | `node src/server.js`. |
-| Testes        | `npm test`        | Executa a suíte Jest. |
+| Script          | Comando        | Descrição |
+|-----------------|----------------|-----------|
+| Desenvolvimento | `npm run dev`  | `nodemon` em `src/server.js`. |
+| Início          | `npm start`    | `node src/server.js`. |
+| Testes          | `npm test`     | Executa a suíte Jest. |
 
 ## Licença
 
