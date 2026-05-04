@@ -1,6 +1,6 @@
 # TaskBoard API
 
-API REST em **Node.js** para o ecossistema TaskBoard: autenticação de usuários com **JWT**, tarefas pessoais associadas ao usuário, persistência em **MongoDB** (via **Mongoose**) e documentação interativa com **Swagger UI**. O servidor expõe rotas sob o prefixo **`/api`** e carrega a especificação OpenAPI a partir de `src/docs/swagger.yaml`.
+API REST em **Node.js** para TaskBoard: autenticação de usuários com **JWT**, tarefas pessoais associadas ao usuário, persistência em **MongoDB** (via **Mongoose**) e documentação interativa com **Swagger UI**. O servidor expõe rotas sob o prefixo **`/api`** e carrega a especificação OpenAPI a partir de `src/docs/swagger.yaml`.
 
 ## O que a API oferece
 
