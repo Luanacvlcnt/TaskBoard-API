@@ -93,12 +93,12 @@ async function registerUser({ name, email, password }) {
 async function loginUser({ email, password }) {
   const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
-    throw new Error("Invalid credentials.");
+    throw new Error("Credenciais inválidas");
   }
 
   const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
   if (!isPasswordValid) {
-    throw new Error("Invalid credentials.");
+    throw new Error("Credenciais inválidas");
   }
 
   const token = createToken({ sub: user._id.toString() });

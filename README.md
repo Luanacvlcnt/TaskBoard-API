@@ -107,6 +107,9 @@ npm start
 Com a aplicação no ar, a API fica disponível em `http://localhost:<PORT>` (por exemplo `http://localhost:3000`). A documentação interativa:
 
 - **Swagger UI:** `http://localhost:3000/api-docs`
+- `npm run dev`: inicia com `nodemon` (reinicia automaticamente ao alterar arquivos)
+- `npm start`: inicia de forma estatica
+- `npm test`: executa os testes unitarios com Jest
 
 ## Endpoints (resumo)
 
