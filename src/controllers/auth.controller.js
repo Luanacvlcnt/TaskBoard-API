@@ -7,16 +7,11 @@ const {
 async function register(req, res) {
   try {
     const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "name, email and password are required.",
-      });
-    }
-
     const result = await registerUser({ name, email, password });
     return res.status(201).json(result);
   } catch (error) {
-    return res.status(400).json({ message: error.message });
+    const status = error.statusCode ?? 400;
+    return res.status(status).json({ message: error.message });
   }
 }
 
