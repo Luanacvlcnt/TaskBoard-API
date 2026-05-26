@@ -33,19 +33,22 @@ src/
     database.js          # mongoose.connect
     swagger.js           # Carrega swagger.yaml
   controllers/
-    auth.controller.js   # HTTP: register, login, me
+    auth.controller.js
+    task.controller.js
   docs/
     swagger.yaml         # Especificação OpenAPI
   middlewares/
     auth.middleware.js   # Validação JWT (Bearer)
   models/
-    User.js              # Schema de usuário
+    User.js
+    Task.js
   routes/
-    auth.routes.js       # Rotas /auth/*
-    index.js             # Agrega /health e /auth
+    auth.routes.js
+    tasks.routes.js
+    index.js
   services/
-    auth.service.js      # Regras de negócio de autenticação
-    auth.service.unit.test.js   # Testes unitários (Jest)
+    auth.service.js
+    task.service.js
 ```
 
 ## Pré-requisitos
@@ -154,7 +157,12 @@ npx jest --verbose
 
 Requisito: ter rodado `npm install` para instalar o Jest em `devDependencies`.
 
-## Scripts npm
+- `GET /api/health`
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/auth/me` (JWT Bearer)
+- `POST /api/tasks` (JWT Bearer) — criar tarefa pessoal
+- `GET /api/tasks` (JWT Bearer) — listar tarefas do usuario autenticado
 
 | Script        | Comando           | Descrição |
 |---------------|-------------------|-----------|
