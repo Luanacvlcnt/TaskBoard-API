@@ -1,0 +1,54 @@
+name: CI - Node.js Tests
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Start server in background
+        run: |
+          npm start &
+          sleep 5
+        env:
+          NODE_ENV: test
+
+      - name: Wait for server to be ready
+        run: |
+          set -e
+          ATTEMPTS=0
+          MAX_ATTEMPTS=30
+          until curl -f http://localhost:3000/health > /dev/null 2>&1; do
+            ATTEMPTS=$((ATTEMPTS + 1))
+            if [ "$ATTEMPTS" -ge "$MAX_ATTEMPTS" ]; then
+              echo "Server did not start in time"
+              exit 1
+            fi
+            echo "Waiting for server... ($ATTEMPTS/$MAX_ATTEMPTS)"
+            sleep 2
+          done
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run unit tests
+        run: npm run test:unit

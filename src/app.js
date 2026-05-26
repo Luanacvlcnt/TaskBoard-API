@@ -10,6 +10,10 @@ const swaggerSpec = loadSwaggerSpec();
 app.use(cors());
 app.use(express.json());
 
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.use("/api", routes);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
