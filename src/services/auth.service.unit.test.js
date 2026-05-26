@@ -1,12 +1,13 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
-const { loginUser } = require("./auth.service");
+const { registerUser } = require("./auth.service");
 
-jest.mock("bcryptjs");
 jest.mock("../models/User");
+jest.mock("bcryptjs");
+jest.mock("jsonwebtoken");
 
-describe("auth.service - loginUser", () => {
+describe("auth.service - registerUser", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -16,70 +17,129 @@ describe("auth.service - loginUser", () => {
       JWT_SECRET: "test-secret",
       JWT_EXPIRES_IN: "1h",
     };
+    jwt.sign.mockReturnValue("mock-jwt");
   });
 
   afterAll(() => {
     process.env = originalEnv;
   });
 
-  it("returns user and JWT token on successful login", async () => {
-    const mockUser = {
+  it("persists user with bcrypt hash and returns JWT on success", async () => {
+    const createdAt = new Date("2026-03-01T12:00:00.000Z");
+    const updatedAt = createdAt;
+
+    User.findOne.mockResolvedValue(null);
+    bcrypt.hash.mockResolvedValue("hashed-password");
+    User.create.mockResolvedValue({
       _id: { toString: () => "user-id-1" },
       name: "Joao",
       email: "joao@email.com",
-      passwordHash: "hashed-password",
-      createdAt: new Date("2026-01-01T00:00:00.000Z"),
-      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
-    };
+      createdAt,
+      updatedAt,
+    });
 
-    User.findOne.mockResolvedValue(mockUser);
-    bcrypt.compare.mockResolvedValue(true);
-
-    const result = await loginUser({
-      email: "joao@email.com",
+    const result = await registerUser({
+      name: "  Joao ",
+      email: "  JOAO@EMAIL.COM  ",
       password: "12345678",
     });
 
     expect(User.findOne).toHaveBeenCalledWith({ email: "joao@email.com" });
-    expect(bcrypt.compare).toHaveBeenCalledWith("12345678", "hashed-password");
+    expect(bcrypt.hash).toHaveBeenCalledWith("12345678", 10);
+    expect(User.create).toHaveBeenCalledWith({
+      name: "Joao",
+      email: "joao@email.com",
+      passwordHash: "hashed-password",
+    });
+    expect(jwt.sign).toHaveBeenCalled();
+    expect(result.token).toBe("mock-jwt");
     expect(result.user).toEqual({
       id: "user-id-1",
       name: "Joao",
       email: "joao@email.com",
-      createdAt: mockUser.createdAt,
-      updatedAt: mockUser.updatedAt,
+      createdAt,
+      updatedAt,
     });
-
-    const decoded = jwt.verify(result.token, process.env.JWT_SECRET);
-    expect(decoded.sub).toBe("user-id-1");
-    expect(decoded.exp).toBeDefined();
   });
 
-  it("throws unauthorized error when email is not found", async () => {
+  it("rejects duplicate email with 409", async () => {
+    User.findOne.mockResolvedValue({ _id: "existing" });
+
+    await expect(
+      registerUser({
+        name: "Maria",
+        email: "joao@email.com",
+        password: "12345678",
+      })
+    ).rejects.toMatchObject({
+      statusCode: 409,
+      message: "E-mail já cadastrado",
+    });
+
+    expect(bcrypt.hash).not.toHaveBeenCalled();
+    expect(User.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects password shorter than 8 characters with 400", async () => {
     User.findOne.mockResolvedValue(null);
 
     await expect(
-      loginUser({
-        email: "naoexiste@email.com",
+      registerUser({
+        name: "Maria",
+        email: "maria@email.com",
+        password: "short",
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "A senha deve ter no mínimo 8 caracteres.",
+    });
+
+    expect(User.create).not.toHaveBeenCalled();
+  });
+
+  it("rejects invalid email format with 400", async () => {
+    await expect(
+      registerUser({
+        name: "Maria",
+        email: "not-an-email",
         password: "12345678",
       })
-    ).rejects.toThrow("Credenciais inválidas");
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "O e-mail informado não é válido.",
+    });
+    expect(User.findOne).not.toHaveBeenCalled();
   });
 
-  it("throws unauthorized error when password is invalid", async () => {
-    const mockUser = {
-      _id: { toString: () => "user-id-1" },
-      passwordHash: "hashed-password",
-    };
-
-    User.findOne.mockResolvedValue(mockUser);
-    bcrypt.compare.mockResolvedValue(false);
+  it("rejects empty or whitespace-only name with 400", async () => {
+    await expect(
+      registerUser({
+        name: "",
+        email: "maria@email.com",
+        password: "12345678",
+      })
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "O nome é obrigatório.",
+    });
 
     await expect(
-      loginUser({
-        email: "joao@email.com",
-        password: "wrong-password",
+      registerUser({
+        name: "   ",
+        email: "maria@email.com",
+        password: "12345678",
       })
-    ).rejects.toThrow("Credenciais inválidas");
+    ).rejects.toMatchObject({
+      statusCode: 400,
+      message: "O nome é obrigatório.",
+    });
   });
+
+  it("rejects missing fields with 400", async () => {
+    await expect(registerUser({})).rejects.toMatchObject({
+      statusCode: 400,
+      message: "Informe nome, e-mail e senha.",
+    });
+  });
+
 });
