@@ -171,7 +171,3 @@ Requisito: ter rodado `npm install` para instalar o Jest em `devDependencies`.
 | Desenvolvimento | `npm run dev`  | `nodemon` em `src/server.js`. |
 | Início          | `npm start`    | `node src/server.js`. |
 | Testes          | `npm test`     | Executa a suíte Jest. |
-
-## Licença
-
-ISC (conforme `package.json`).
